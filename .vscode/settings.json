@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "stack": "c",
+        "stparser.h": "c",
+        "stdlib.h": "c",
+        "type_traits": "c"
+    }
+}
