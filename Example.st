@@ -3,5 +3,5 @@ main(): int {
 	if (x == 1) {
 		return 1;
 	}
-	return_test 0;
+	return 0;
 }
