@@ -1,5 +1,9 @@
 CC=gcc
 CFLAGS=-std=gnu99 -m64 -I.
 
-stcompiler: St.o StLex.o StParser.o StVM.o
-	$(CC) -o st St.o StLex.o StParser.o StVM.o
+objects := $(patsubst %.c,%.o,$(wildcard *.c))
+
+stcompiler: $(objects)
+	$(CC) -o st $(objects)
+clean:
+	rm $objects
