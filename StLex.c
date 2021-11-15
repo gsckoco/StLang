@@ -92,7 +92,7 @@ char* clone(char* temp, int size)
     return str;
 }
 
-int StLex_Lex(const char* file)
+StLex_Token* StLex_Lex(const char* file)
 {
     StLex_LexState lexState = {};
 
@@ -255,4 +255,6 @@ int StLex_Lex(const char* file)
         }
         printf("\n");
     }
+
+    return lexState.tokenStart;
 }

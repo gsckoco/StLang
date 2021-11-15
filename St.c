@@ -33,6 +33,7 @@ void main(int argc, char* argv[])
         int sizeOfFile = fread(sourceString, fileSize, 1, sourceFile);
         sourceString[fileSize] = '\0';
         fclose(sourceFile);
-        StLex_Lex(sourceString);
+        StLex_Token *token = StLex_Lex(sourceString);
+        StParse_Parse(token);
     }
 }

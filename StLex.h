@@ -1,3 +1,6 @@
+#ifndef STLEX_H
+#define STLEX_H
+
 #define MAX_NAME_SIZE
 
 enum StLex_Tokens {
@@ -57,4 +60,6 @@ typedef struct _lexState {
 } StLex_LexState;
 
 
-int StLex_Lex(const char* source);
+StLex_Token* StLex_Lex(const char* source);
+
+#endif
