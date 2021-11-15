@@ -16,6 +16,7 @@ main(): int {
 ```
 
 ## Whats done?
-- [ ] VM
+- [ ] VM?
+- [ ] Transpiler?
 - [ ] Parser
 - [x] Lexer
