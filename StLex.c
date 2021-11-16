@@ -99,6 +99,7 @@ StLex_Token* StLex_Lex(const char* file)
     lexState.source = file;
     lexState.cursor = 0;
     lexState.current = lexState.source[lexState.cursor];
+    lexState.currentLine = 1;
 
     StLex_Token startToken = { .tokenType = TK_START };
 
@@ -115,10 +116,15 @@ StLex_Token* StLex_Lex(const char* file)
             StLex_Token newToken = { .tokenType = TK_END, .value.str = str };
             addTokenToList(&lexState, &newToken);
             break;
+        } else if (lexState.current == '\n') {
         }
 
         StLex_Token *newToken = malloc(sizeof(StLex_Token));
         newToken->tokenType = TK_UNDEFINED;
+
+        newToken->line = lexState.currentLine;
+        newToken->startColumn = lexState.cursor + 1;
+
         switch (lexState.current) {
         case '{': {
             newToken->tokenType = TK_OPEN_BLOCK;
@@ -158,6 +164,10 @@ StLex_Token* StLex_Lex(const char* file)
                 newToken->value.c = '=';
                 previousCharacter(&lexState);
             }
+            break;
+        }
+        case '\n': {
+            lexState.currentLine++;
             break;
         }
         default: { // Is alpha numeric
@@ -217,6 +227,7 @@ StLex_Token* StLex_Lex(const char* file)
             break;
         }
         }
+        newToken->endColumn = lexState.cursor + 1;
         if (newToken->tokenType != TK_UNDEFINED) {
             addTokenToList(&lexState, newToken);
         }
@@ -230,10 +241,10 @@ StLex_Token* StLex_Lex(const char* file)
         switch (currentHead->tokenType) {
         case TK_COMPARISON:
         case TK_NAME:
-            printf("String: %s", (currentHead->value.str));
+            printf("String: %s @ %d -> %d", (currentHead->value.str), currentHead->startColumn, currentHead->endColumn);
             break;
         case TK_KEYWORD:
-            printf("Keyword: %s", KeywordNames[currentHead->value.number]);
+            printf("Keyword: %s @ %d -> %d", KeywordNames[currentHead->value.number], currentHead->startColumn, currentHead->endColumn);
             break;
         case TK_ASSIGN:
         case TK_TYPE_ASSIGN:
@@ -242,7 +253,7 @@ StLex_Token* StLex_Lex(const char* file)
         case TK_CLOSE_PARENTH:
         case TK_OPEN_BLOCK:
         case TK_CLOSE_BLOCK:
-            printf("%c", currentHead->value.c);
+            printf("%c @ %d -> %d", currentHead->value.c, currentHead->startColumn, currentHead->endColumn);
             break;
         case TK_START:
             printf("<FILE START>");
