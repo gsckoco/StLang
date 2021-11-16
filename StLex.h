@@ -46,6 +46,12 @@ typedef struct _token {
     } value;
     enum StLex_Tokens tokenType;
     struct _token *nextToken;
+
+    /* Debug */
+    int line;
+    int startColumn;
+    int endColumn;
+    char *fileName;
 } StLex_Token;
 
 typedef struct _lexState {
@@ -54,6 +60,7 @@ typedef struct _lexState {
     char current;
     int cursor;
 
+    int currentLine;
     int tokenCount;
     StLex_Token* tokenStart;
     StLex_Token* currentToken;
