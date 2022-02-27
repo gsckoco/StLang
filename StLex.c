@@ -60,6 +60,7 @@ void addTokenToList(StLex_LexState* lexState, StLex_Token* token)
     //lexState->tokens;
     //token->nextToken = 0;
     lexState->currentToken->nextToken = token;
+    token->lastToken = lexState->currentToken;
     lexState->currentToken = token;
     return;
 }
@@ -92,40 +93,52 @@ char* clone(char* temp, int size)
     return str;
 }
 
+const char* StLex_GetTokenName(enum StLex_Tokens token) {
+    return TokenNames[token];
+}
+
 StLex_Token* StLex_Lex(const char* file)
 {
-    StLex_LexState lexState = {};
+    StLex_LexState* lexState = malloc(sizeof(StLex_LexState));
 
-    lexState.source = file;
-    lexState.cursor = 0;
-    lexState.current = lexState.source[lexState.cursor];
-    lexState.currentLine = 1;
+    lexState->source = file;
+    lexState->cursor = 0;
+    lexState->current = lexState->source[lexState->cursor];
+    lexState->currentLine = 1;
 
-    StLex_Token startToken = { .tokenType = TK_START };
+    StLex_Token* startToken = malloc(sizeof(StLex_Token));
 
-    lexState.tokenStart = &startToken;
-    lexState.currentToken = &startToken;
+    startToken->tokenType = TK_START;
+
+    lexState->tokenStart = startToken;
+    lexState->currentToken = startToken;
 
     char* temp = "";
 
     for (;;) {
-        //printf("%c", lexState.current);
-        if (lexState.current == 0) {
-            // EOF
-            char* str = "<EOF>";
-            StLex_Token newToken = { .tokenType = TK_END, .value.str = str };
-            addTokenToList(&lexState, &newToken);
-            break;
-        } else if (lexState.current == '\n') {
-        }
+        //printf("%c", lexState->current);
 
         StLex_Token *newToken = malloc(sizeof(StLex_Token));
         newToken->tokenType = TK_UNDEFINED;
 
-        newToken->line = lexState.currentLine;
-        newToken->startColumn = lexState.cursor + 1;
+        newToken->line = lexState->currentLine;
+        newToken->startColumn = lexState->cursor + 1;
+        newToken->nextToken = 0;
 
-        switch (lexState.current) {
+        if (lexState->current == 0) {
+            // EOF
+            char* str = "<EOF>";
+            //StLex_Token newToken = { .tokenType = TK_END, .value.str = str };
+
+            newToken->tokenType = TK_END;
+            newToken->value.str = str;
+
+            addTokenToList(lexState, newToken);
+            break;
+        } else if (lexState->current == '\n') {
+        }
+
+        switch (lexState->current) {
         case '{': {
             newToken->tokenType = TK_OPEN_BLOCK;
             newToken->value.c = '{';
@@ -152,8 +165,8 @@ StLex_Token* StLex_Lex(const char* file)
             break;
         }
         case '=': { // Variable assignment
-            nextCharacter(&lexState);
-            if (lexState.current == '=') {
+            nextCharacter(lexState);
+            if (lexState->current == '=') {
                 // Comparison
                 char* str = "==";
                 newToken->tokenType = TK_COMPARISON;
@@ -162,40 +175,40 @@ StLex_Token* StLex_Lex(const char* file)
                 // Assignment
                 newToken->tokenType = TK_ASSIGN;
                 newToken->value.c = '=';
-                previousCharacter(&lexState);
+                previousCharacter(lexState);
             }
             break;
         }
         case '\n': {
-            lexState.currentLine++;
+            lexState->currentLine++;
             break;
         }
         default: { // Is alpha numeric
             char *temp = malloc(0);
             int size = 0;
-            temp[0] = 0;
+            //temp[0] = 0;
             int tokenType = 0;
-            if (isCharNumerical(lexState.current)) {
+            if (isCharNumerical(lexState->current)) {
                 tokenType = TK_NUMBER;
-                while (isCharNumerical(lexState.current)) {
+                while (isCharNumerical(lexState->current)) {
                     temp = realloc(temp, size + 1);
-                    temp[size] = lexState.current;
+                    temp[size] = lexState->current;
                     size++;
-                    nextCharacter(&lexState);
+                    nextCharacter(lexState);
                 }
-                previousCharacter(&lexState);
+                previousCharacter(lexState);
                 temp = realloc(temp, size);
                 temp[size] = 0;
                 break;
-            } else if (isCharAlphabetical(lexState.current)) {
+            } else if (isCharAlphabetical(lexState->current)) {
                 tokenType = TK_NAME;
-                while (isCharAlphabetical(lexState.current) || isCharNumerical(lexState.current)) {
+                while (isCharAlphabetical(lexState->current) || isCharNumerical(lexState->current)) {
                     temp = realloc(temp, size + 1);
-                    temp[size] = lexState.current;
+                    temp[size] = lexState->current;
                     size++;
-                    nextCharacter(&lexState);
+                    nextCharacter(lexState);
                 }
-                previousCharacter(&lexState);
+                previousCharacter(lexState);
                 temp = realloc(temp, size);
                 temp[size] = 0;
             } else {
@@ -206,7 +219,7 @@ StLex_Token* StLex_Lex(const char* file)
                 int i;
                 for (i = 0; i < KEYWORD_COUNT; i++) {
                     if (strncmp(temp, KeywordNames[i], size) == 0) {
-                        printf("%s == %s\n", temp, KeywordNames[i]);
+                        //printf("%s == %s\n", temp, KeywordNames[i]);
                         tokenType = TK_KEYWORD;
                         break;
                     }
@@ -227,14 +240,14 @@ StLex_Token* StLex_Lex(const char* file)
             break;
         }
         }
-        newToken->endColumn = lexState.cursor + 1;
+        newToken->endColumn = lexState->cursor + 1;
         if (newToken->tokenType != TK_UNDEFINED) {
-            addTokenToList(&lexState, newToken);
+            addTokenToList(lexState, newToken);
         }
-        //printf("%s\n", TokenNames[lexState.currentToken->tokenType]);
-        nextCharacter(&lexState);
+        //printf("%s\n", TokenNames[lexState->currentToken->tokenType]);
+        nextCharacter(lexState);
     }
-    StLex_Token* currentHead = lexState.tokenStart;
+    StLex_Token* currentHead = lexState->tokenStart;
     while (currentHead != 0 && currentHead->tokenType != TK_END) {
         currentHead = currentHead->nextToken;
         printf("%s ", TokenNames[currentHead->tokenType]);
@@ -267,5 +280,5 @@ StLex_Token* StLex_Lex(const char* file)
         printf("\n");
     }
 
-    return lexState.tokenStart;
+    return lexState->tokenStart->nextToken;
 }

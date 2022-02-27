@@ -45,7 +45,9 @@ typedef struct _token {
         int number;
     } value;
     enum StLex_Tokens tokenType;
+    
     struct _token *nextToken;
+    struct _token *lastToken;
 
     /* Debug */
     int line;
@@ -66,7 +68,7 @@ typedef struct _lexState {
     StLex_Token* currentToken;
 } StLex_LexState;
 
-
+const char* StLex_GetTokenName(enum StLex_Tokens token);
 StLex_Token* StLex_Lex(const char* source);
 
 #endif
