@@ -1,17 +1,7 @@
 #ifndef STEXPRESSION_H
 #define STEXPRESSION_H
 
-typedef struct _Loc {
-    int startColumn;
-    int endColumn;
-    int startLine;
-    int endLine;
-    int offset;
-} StParse_Loc;
-
-typedef struct {
-
-} StParse_Body;
+#include "StLex.h"
 
 enum StParse_ScopeType {
     ST_ARGS,
@@ -24,20 +14,34 @@ typedef struct {
     char* type;
 } StParse_Param;
 
-// Function call
-typedef struct {
-
-} StParse_Args;
-
-// Function decl
 typedef struct {
     StParse_Param* params;
+    unsigned int count;
 } StParse_Params;
 
 typedef struct {
+    
+} StParse_Argument;
+
+typedef struct {
+    char* funcName;
+
+} StParse_FuncCall;
+
+typedef struct {
+    void* node;
+} StParse_Node;
+
+typedef struct {
+    StParse_Node* nodes;
+} StParse_Body;
+
+typedef struct {
     char* name;
+    StParse_Params* params;
     StParse_Body body;
-    StParse_Loc loc;
+    StLex_Loc loc;
+    char* type;
 } StParse_Function;
 
 typedef struct

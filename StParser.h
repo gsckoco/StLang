@@ -3,10 +3,8 @@
 
 #include "StLex.h"
 #include "StExpressions.h"
+#include "StErr.h"
 
-
-struct StParser_Node {
-};
 
 int StParse_Parse(StLex_Token* startToken);
 
