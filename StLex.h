@@ -13,6 +13,7 @@ enum StLex_Tokens {
 
     TK_NAME,
     TK_NUMBER,
+    TK_STRING,
 
     TK_OPEN_PARENTH,
     TK_CLOSE_PARENTH,
@@ -37,6 +38,14 @@ typedef struct _string {
 
 } StLex_String;
 
+typedef struct {
+    int startColumn;
+    int endColumn;
+    int startLine;
+    int endLine;
+    int offset;
+} StLex_Loc;
+
 typedef struct _token {
     union Value
     {
@@ -50,9 +59,7 @@ typedef struct _token {
     struct _token *lastToken;
 
     /* Debug */
-    int line;
-    int startColumn;
-    int endColumn;
+    StLex_Loc loc;
     char *fileName;
 } StLex_Token;
 
@@ -69,6 +76,7 @@ typedef struct _lexState {
 } StLex_LexState;
 
 const char* StLex_GetTokenName(enum StLex_Tokens token);
+void StLex_PrintToken(StLex_Token *token);
 StLex_Token* StLex_Lex(const char* source);
 
 #endif
